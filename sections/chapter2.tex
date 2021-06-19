@@ -1,0 +1,143 @@
+
+
+\chapter{Compressive Sensing}
+
+In an underdetermined system of linear equations there are fewer equations than unknowns. In mathematical terms this can we stated as the matrix equation $A\mathbf{x=y}$ where $A\in \mathbb{C}^{M \times N}$, $\mathbf{x} \in \mathbb{C}^{N}$ , $\mathbf{y} \in \mathbb{C}^{M}$ and $M < N $.  This equation is unsolvable in the general case, however, under certain conditions, it is possible to find exact or estimated solutions. The underlying assumptions that make it possible is sparsity and compressibility. The research area associated with these assumptions is called compressive sensing. The goal of this chapter is to show that by using compressive sensing techniques it is possible to construct a stable and robust mapping $\mathbf{B}: \mathbb{C}^{M}\rightarrow  \mathbb{C}^{N}$ such that an estimate or solution would exist for the \emph{inverse problem} $\mathbf{x}=A^{-1}\mathbf{y}$.
+
+\section{Sparsity and Compressibility}
+
+This section introduces the reader to the main assumptions and their notions in CS. Necessary terminology will be introduced appropriately. 
+
+
+\begin{definition} The support of a vector $\mathbf{x}	 \in \mathbb{C}^{N}$ is the index set of its non-zero entries, that is: 
+$$supp(\mathbf{x}):=\set{i \in [N]: x_{i} \neq 0}.$$
+	
+	
+\end{definition}	
+
+In Compressive Sensing it is customary to abuse the $l_{0}$ notation to denote the cardinality of the support set , i.e. the number of non-zero entries of a vector. The $\norm{\cdot}_{0}$ fails to be a norm due to not satisfying the scaling property of norms. We can now define \emph{s-sparse} vectors.
+
+\begin{definition}
+The vector $\mathbf{x} \in \mathbb{C}^{N}$ is called \emph{s-sparse} if it has no more than \emph{s} non-zero entries, that is if: 
+$\norm{\mathbf{x}}_{0} \leq s$	
+	
+	
+\end{definition}	
+
+The notion of sparsity is an ideal one, meaning that in the real world it may very well be that our vector is only close to being sparse. In order for CS to tackle more problems, we may also be interested in the following notion of  \emph{compressibility}. 
+
+
+\begin{definition}
+For \emph{p} > 0, the measure of a vectors compressibility is given by the $l_{p}$ - error of best s-term approximation to $\mathbf{x} \in \mathbb{C}^{N}$ defined by $$ \sigma \mathbf{(x)}_{p}:= inf \set{\norm{ \mathbf{x}-\mathbf{z}}_{p}, \mathbf{z} \in \mathbb{C}^{N}  is s-sparse } $$
+\end{definition}	
+
+Informally, a vector is compressible if $l_{p}-error$ decays quickly in $s$.
+
+\section{Algorithms}
+
+In line with our goal to construct the mapping $\mathbf{B}: \mathbb{C}^{M}\rightarrow  \mathbb{C}^{N}$ it will be useful to restate the compressive sensing problem as an optimization problem and to show that by solving the compressive sensing problem, that is to find the  s-sparse vector consistent with Ax=y,  we also solve the map construction problem.
+
+
+
+\begin{equation} 
+\text{min} \ \norm{ \mathbf{z}}_{0}  \ \text{subject to}  \ A \mathbf{z} = A \mathbf{x}
+\end{equation}
+
+
+($P_0$) is a combinatorial optimization problem, but the problem is generally NP-hard. Since this makes ($P_0$) intractable, we will solve the convex relaxation of ($P_0$) instead. 
+
+
+\begin{equation} 
+\text{min} \norm{ \mathbf{z}}_{1} \ \text{subject to} \ A\mathbf{z} = A\mathbf{x}
+\end{equation}
+
+
+Solving the inverse problem by solving ($P_{1}$) is known as Basis Pursuit. 
+
+
+
+\section*{Basis Pursuit} 
+
+In order to show why BP can solve ($P_{0}$)  we need to introduce the Null Space Property of a matrix A: 
+
+
+\begin{definition} 
+A matrix $A$  $\in$ $\mathbb{C}^{M \times N}$ is said to satisfy the \emph{Null Space Property (NSP)} relative to a set $S$ $\subset$ $\set{1,2,...,N}$ if 
+\[
+\text{min} \ \norm{ \mathbf{v}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1}  \ \text{for all} \ \mathbf{v} \in \text{ker} A \setminus \set{\mathbf{0}}
+\]
+A is said to satisfy the \emph{Null Space Property of order s} if it satisfies the null space property relative to any set S $\subset$ $\set{1,2,...,N}$ with |S| $\leq$ \emph{s}
+\end{definition}
+
+The following theorem shows that the NSP of a matrix is a sufficient condition in order to solve ($P_{0}$).
+
+\begin{theorem}
+Given a matrix $A$ $\in$ $\mathbb{C}^{M \times N}$, every vector  $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ supported on a set $S$ is the unique solution $(P_1)$ with A$\mathbf{x}$ = $\mathbf{y}$ if and only if A satisfies the NSP relative to $S$. \\ \\
+Furthermore, if the set $S$ varies, then every s-sparse vector $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ is the unique solution to $(P_1)$ with A$\mathbf{x}$ = $\mathbf{y}$ if and only if A satisfies the NSP of order s.
+\end{theorem}
+
+
+\begin{proof}
+
+Let S be a fixed index set, and assume that every vector  $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ supported on this set, is the unique minimizer of $(P_1)$. From the assumption it follows that for  $\mathbf{v}$ $\in$ \text{ker} $A$ $\setminus$ $\set{\mathbf{0}}$, the vector $\mathbf{v}_{S}$ is the unique minimizer of $(P_1)$. Since $A(\mathbf{v}_{S}+\mathbf{v}_{\overline{S}}$) = $\mathbf{0}$ and $\mathbf{-v}_{S} \neq \mathbf{v}_{\overline{S}}$, from the minimality assumption we must have that $\norm{ \mathbf{-v}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1}$. This established the NSP relative to S.
+\\ \\
+Conversely, assume that NSP relative to $S$ holds. Let $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ be supported on  $S$ and a vector $\mathbf{z}$ $\in$ $\mathbb{C}^{N}$, $\mathbf{z} \neq \mathbf{x}$, such that $A\mathbf{z} = A\mathbf{x}$. Following the rules for norms and taking complements for the support of a set , we obtain
+\begin{equation*}
+\norm{ \mathbf{x}}_{1} \leq \norm{ \mathbf{x} - \mathbf{z}_{S}}_{1} +  \norm{\mathbf{z}_{S}}_{1} =\norm{\mathbf{v}_{S}}_{1}  + \norm{\mathbf{z}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1} + \norm{\mathbf{z}_{S}}_{1} = \norm{ \mathbf{-z}_{\overline{S}}}_{1} + \norm{\mathbf{z}_{S}}_{1} = \norm{\mathbf{z}}_{1}.
+\end{equation*}
+Which shows that $\mathbf{x}$ obtains the unique minimum.
+\\ \\
+To prove the second part of the theorem,let $S$ vary and assume that every $s$-sparse vector  $\mathbf{x}$ is found by solving $(P_1)$ subject to $A\mathbf{x} = \mathbf{y}$. Let $\mathbf{z}$ be the solution to $P_0$ subject to  $A\mathbf{x} = \mathbf{y}$ then $\norm{\mathbf{z}}_{0} \leq \norm{\mathbf{x}}_{0}$ so that also $\mathbf{z}$ is $s$-sparse. But since every $s$-sparse vector is the unique minimizer of $(P_1)$, we have that $\mathbf{x} = \mathbf{z}$ and the result follows.
+\end{proof}
+
+
+\section*{Minimum Number Of Rows}
+
+From the results above it is clear that if a matrix possesses the NSP property of order $s$, the BP will solve $(P1)$. Next we will introduce a theorem that can identify when A has the NSP of order $s$.  
+
+\begin{theorem}
+Given a matrix A $\in \mathbb{C}^{M \times N}$, then every set of 2s columns of A is linearly independent if and only if A satisfies the NSP of order $s$. 
+\end{theorem}
+
+\begin{proof}
+Assume that every 2s columns of A linearly independent, then from The Invertible Matrix Theorem, we have that the kernel of $A$ does not contain any other 2$s$-sparse vector other than $\mathbf{0}$. Now let $\mathbf{x}$, and $\mathbf{z}$ be $s$-sparse with $A\mathbf{z} = A\mathbf{x}$. Then $A(\mathbf{x}-\mathbf{z}) = \mathbf{0}$ and $\mathbf{x}-\mathbf{z}$ is 2$s$-sparse, but since ker $A \setminus \set{\mathbf{0}}$ is empty, we must have $\mathbf{x}=\mathbf{z}$, but this implies that the NSP of order s holds.
+\\ Conversely, assume that the kernel of $A$ does not contain any other 2$s$-sparse vector other than $\mathbf{0}$, then for any set $S$ with $card(S)$=2$s$, the matrix $A_{S}$ only has the trivial solution and thereby 2$s$ linearly independent columns. 
+\end{proof}
+
+From these results we can derive that : 
+
+\begin{corollary}
+In order for Basis Pursuit to solve $(P_{0})$, the matrix A has to satisfy: 
+\begin{equation*}
+2s \leq rank A \leq m
+\end{equation*}
+\end{corollary}
+
+\section*{Stability And Robustness}
+
+Basis Pursuit features two important properties, namely \emph{stability} and  \emph{robustness}.
+These two properties tackle sparsity defects and noise . 
+
+\begin{definition}
+A matrix $A \in \mathbb{C}^{M \times N}$ is said to satisfy the \emph{robust null space property} with constants $0 < \rho < 1$ and $ \tau > 0$ relative to a set $S \subset [N]$ if 
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1}  <  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} + \tau \norm{A\mathbf{v}} \ \text{for all} \ \mathbf{v} \in \mathbb{C}^{N}
+\end{equation*}
+\\ Furthermore, it satisfies the robust null space of order \emph{s} if it satisfies stable robust null space relative to any set $S \subset [N]$ with $card(S) \leq s$
+
+\end{definition}
+
+
+The following result....
+
+\begin{theorem}
+Given $1 \leq p \leq q$, suppose that the matrix $A \in \mathbb{C}^{M \times N}$ satisfies the robust null space property of order \emph{s}. Then, for any $\mathbf{x}, \mathbf{z} \in \mathbb{C}^{N}$, 
+\begin{equation*}
+\norm{\mathbf{x-z}}_{p} \leq 
+\end{equation*}
+
+\end{theorem}
+
+\begin{proof}
+Her trengs bevis.
+\end{proof}

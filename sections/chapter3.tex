@@ -1,0 +1,119 @@
+\chapter{Neural Networks}
+
+Neural Networks (NN's), a biologically-inspired programming paradigm, provide among the best solutions to many problems where the neural network has a lot of training data. Consequently, NN's perform well in areas such as image classification, speech recognition, natural language processing, and so forth. However, NN's have reportedly seen to suffer from instabilities in image reconstruction. Our goal is to get mathematical insight to why these instabilities occur. We begin by introducing the basic elements of NN's in framework of supervised machine learning. 
+
+\section{Supervised Machine Learning}
+In supervised machine learning, the objective is to learn a mapping $f$ from an input space $\mathbb{U}$ to an output space $\mathbb{V}$. The 2-tuple set 
+$\set{(u_i, v_i)}^{n}_{i=1}$, $u_i \in \mathbb{U}$, $v_i \in \mathbb{V}$ is refer to as the \emph{training set}.  By varying the output space $\mathbb{V}$, we can choose what our function $f$ should model. \\For instance, if $v_i$ takes the values -1 or 1 , then $f$ is modelling  a \emph{binary classification} problem or if $v_i$ takes three or more discrete values then $f$ is modelling the \emph{multiclass classification} problem. \\ \\
+Image reconstruction can be cast as a supervised learning problem as following : Let $\mathbb{U} \subseteq \mathbb{C}^M$ and $\mathbb{V} \subseteq \mathbb{C}^N$ such that $\set{(y_i, x_i)}^{n}_{i=1}$ is the training set with $x_i$ as images and $y_i$ the corresponding measurements. Our goal is then to find a matrix $A$ such that we can express 
+\begin{equation*}
+y_i = Ax_i + \epsilon ,\  \ i \in \set{1,...,n}
+\end{equation*}
+which corresponds to learning the mapping $f(u_i) = v_i + \epsilon$ , $ i \in \set{1,...,n}$. It is desirable that this mapping has \emph{small training error}, i.e. $f(u_i) \approx v_i$  for $i$ = 1,...,$n$, but also that the mapping \emph{generalizes} well to new data $\set{(y_k, x_k)}$ which is close to , but not part of the training set.\\ The task of computing the mapping $f$ is known as \emph{training the model}, such a mapping could for instance be a NN.
+
+\section{Design}
+The term neural network covers a large class of models and learning methods. Here we try to give a description that is sufficient for the later analysis.
+
+\begin{definition}
+Let $n_0,...,n_L \in \mathbb{N}$. Let $W_l : \mathbb{C}^{n_{l-1}} \rightarrow \mathbb{C}^{n_l}$ for $l = 1,2,...,L$ be affine maps. Let $\rho_1,...,\rho_L : \mathbb{C}\rightarrow  \mathbb{C}$ be non-linear, differentiable functions and let $n_0=M$ \text{and} $n_L=N$. Then a map $\phi : \mathbb{C}^{M}\rightarrow  \mathbb{C}^{N}$ given by
+\begin{equation*}
+\phi(y) = \rho_{L}(W_{L}(...\rho_{1}(W_{1}(y))...))
+\end{equation*}
+is called a \emph{Neural Network}.
+\end{definition}
+
+The type of network defined above is a feedforward network. It takes an input $y$ and \emph{feeds} it forward through the network via an alternating sequence of affine maps and non-linear activation functions. It is common to visualize the network as a graph, where the nodes of the graph are the \emph{neurons} and the entries of $W_l$ are the weights assigned to each edge of the graph. At a given \emph{layer}, each neuron takes in a sum of linear combination from the outputs of the neurons in the previous layer, applies a bias, applies an activation function and finally feeds it forward to the next layer of neurons.  
+The number of layers and the number of neurons per layer together with the the activation function $\rho$ is called the \emph{architecture} of the network. 
+
+\begin{figure}
+\centerline{\includegraphics[width=8cm, height=5cm]{network_graph.png}}
+\caption{Extremely simplified NN with a single hidden layer.}
+\end{figure}
+
+
+The choice of activation function may be important to the performance of the network. Common activation functions in the literature include: 
+
+\begin{center}
+\begin{math}
+  ReLU(x)=\begin{cases}
+    x & \text{if $x>0$}\\
+    0 & \text{otherwise}
+  \end{cases} 
+\end{math}
+
+\begin{math}
+  tanh(x)=\cfrac{e^{2x}-1}{e^{2x}+1}
+\end{math}
+
+\begin{math}
+   \sigma(x)=\cfrac{1}{1+e^{-x}}
+\end{math}
+\end{center}
+
+If we look closer at the sigmoid function and the hyperbolic tangent, we observe that for large negative input or large positive input , the derivative of these functions will be close to zero. This is known as the \emph{vanishing gradient problem}, we shall refer to it in the next section.
+
+\begin{figure}
+\centerline{\includegraphics[width=13cm, height=3.5cm]{activations.png}}
+\caption{Different choices of activations functions.}
+\end{figure}
+
+ 
+\section{Training}
+
+The first step in training a NN is to find weights and biases such that the network performs well on the training set. A way to measure how well the network is performing is by defining a \emph{cost function}.
+\subsection{Loss function}
+Several cost functions may be defined, a popular choice is the \emph{quadratic} cost function, also known as \emph{mean squared error(MSE)}:
+\begin{equation}
+C(w)=\cfrac{1}{2n}\sum_{i=1}^{n}\norm{\phi(u_i)-v_i}^2
+\end{equation}
+
+Here, $w$ denotes the collection of all weights and biases in the network, $n$ is the total number of training inputs, $v_i$ is the vector of outputs from the network when $u_i$ is input, and the sum is over all training inputs, $u_i$. Next, we want to optimize $w$ and $b$, that is to solve: 
+
+\begin{equation}
+\text{min}  C(w)
+\end{equation}
+
+This problem is nonlinear, nonconvex and there is generally no possibility of computing global minimizers of it. Even worse, since a NN needs alot of parameters to perform well and alot of training data, it is a major computational challenge. However, there is a practical way to reduce the computational cost, known as \emph{Stochastic Gradient Descent}.
+
+\subsection{Stochastic Gradient Descent}
+To make NN's training practical regarding the computational demand, a first-order optimization method is used to solve (ref). These are based on gradient descent. In a gradient descent method we pick a starting point $w_0$, then we follow the path of steepest descent, that is, we produce the sequence:
+
+\begin{equation}
+w_{i+1}=w_i - \tau_i \nabla C(w_i), \ i = 0,1,...
+\end{equation}
+
+Calculating the gradient requires one pass through all the training set. When the amount of training data is large, this ceases to be computationally feasible. One alternative is already mentioned, stochastic gradient descent. There are several variations, but the main idea is to compute the gradient from a smaller subset of the training data and thereby reducing the computation needed at step $i$. 
+In order to apply the stochastic gradient descent method, we need to compute the gradient $C(w_i)$ including all the weights in the network. The common algorithm for computing such gradients, is known as \emph{backpropagation}. 
+
+\section{The Universal Approximation Theorem}
+
+In supervised machine learning we are assuming that there exists an underlying function that we are approximating. The Universal Approximation Theorem gives justification for the use of NN's to approximate such a function. Before we state the theorem, we recall the definition of a \emph{discriminatory} function.
+
+\begin{definition}
+Let $M(S)$ be the space of finite, signed Borel measures on the compact set $S$.
+We say $\rho$ is \emph{discriminatory} if for $\mu \in M(S)$ and 
+\begin{equation*}
+\int_{I_n} \rho(\mathbf{w^{T}x}+b) \ d\mu\mathbf(x) = 0  \
+\end{equation*}
+for all $\mathbf{w} \in \mathbb{R}^n, b \in \mathbb{R}$ then $\mu = 0$. 
+
+\end{definition}
+
+We are now ready to present the Universal Approximation Theorem and its proof. 
+
+\begin{theorem}{(Universal Approximation Theorem)}
+Let $C(S)$ be the space of continuous functions on S. \\
+If the activation function $\rho$ in the neural network definition is a continuous, discriminatory function, then the set of all neural networks $\mathcal{N}$ is dense in $C(S)$.
+\end{theorem}
+
+\begin{proof}
+To prove that $\mathcal{N}$ is dense in $C(S)$, we will prove that its closure is $C(S)$. By way of contradiction, suppose that $\overline{ \mathcal{N} }$ $\neq C(S)$, then  $\overline{ \mathcal{N} }$ is a closed, proper subspace of $C(S)$. By the Hahn-Banach Theorem, there exist a bounded linear functional $L$, such that $L(\mathcal{N})=L(\overline{ \mathcal{N} }) = 0 $ but $L \neq 0.$ \\ \\ By the Riesz Representation Theorem, we can write the functional L as 
+\begin{equation*}
+L(h) = \int_{S} h(x) \ d\mu(x)
+\end{equation*}
+for some $\mu \in M(S)$ and for all $h \in C(S).$ In particular, since by definition any NN is a member of $\mathcal{N}$, and $L$ is identically zero on $\mathcal{N}$, we have 
+\begin{equation*}
+\int_{S} h(x) \ d\mu(x) = 0
+\end{equation*}
+Since we $\rho$ is discriminatory, we have $\mu = 0$. This contradicts that $L \neq 0$. \\ \\ Therefore, $\mathcal{N}$ is dense in $C(S)$. 
+\end{proof}

@@ -1,0 +1,27 @@
+\chapter{Instabilities In Deep Learning}
+
+Suppose we have trained a NN to approximate an inverse map, $\Psi: \mathbb{C}^{m}\rightarrow  \mathbb{C}^{N}$ where $m << N$. For the NN to be useful, it should perform well on the training set and test set. However, if the NN recovers two vectors $\mathbf{x, x'}$  whose difference lies in the null space of $A$, then there exist a ball around $\mathbf{y}=A\mathbf{x}$ where the NN may perform badly with small perturbations from $\mathbf{y}$. Before we state this consequence as a theorem, recall that local $\epsilon$-Lipschitz constant of a function $\phi$ at $\mathbf{y} \in \mathbb{C}^{m}$ is defined as
+\begin{equation*}
+L^{\epsilon}(\phi,y) = \ \underset{0<d_{2}(z,y,)\leq \epsilon}{\text{sup}} \ \cfrac{d_1(\phi(z),\phi(y))}{d_2(z,y)}
+\end{equation*}
+
+
+\begin{theorem} (Universal Instability Theorem)
+Let $d_1$ and $d_2$ be metrics on $\mathbb{C}^N$ and $\mathbb{C}^m$ respectively, A : $\mathbb{C}^{N}\rightarrow  \mathbb{C}^{m}$ a linear map, and $\Psi : \mathbb{C}^{m}\rightarrow  \mathbb{C}^{N}$ a continuous reconstruction map. Suppose there exist x, x' $\in \mathbb{C}^{N}$ and $\eta$ > 0 such that 
+\begin{equation}
+d_1(\Psi(Ax),x) < \eta , d_1(\Psi(Ax'),x') < \eta, 
+\end{equation}
+\begin{equation}
+d_2(Ax,Ax') \leq \eta. 
+\end{equation}
+\\
+Then there is a closed non-empty ball $\mathcal{B} \subset \mathbb{C}^m$ centred at y = Ax such that the local $\epsilon$-Lipschitz constant at any $\tilde{y} \in \mathcal{B}$ is bounden from below: 
+\begin{equation}
+L^{\epsilon}(\Psi,\tilde{y}) \geq \cfrac{1}{\epsilon}  (d_1(x,x') - 2\eta) , \ \ \epsilon \geq \eta. 
+\end{equation}
+\end{theorem}
+
+
+
+\begin{proof}
+\end{proof}
