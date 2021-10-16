@@ -1,0 +1,666 @@
+\chapter{Compressed Sensing}
+
+
+
+
+
+
+In an underdetermined system of linear equations there are fewer equations than unknowns. In mathematical terms this can be stated as the matrix equation $A\mathbf{x=y}$ where $A\in \mathbb{C}^{m \times N}$, $\mathbf{x} \in \mathbb{C}^{N}$ , $\mathbf{y} \in \mathbb{C}^{m}$ and $m < N $.  From classical linear algebra it follows that this equation is unsolvable in the general case, however, given certain conditions, it is possible to find an exact or an estimate of a solution. 
+
+The research area associated with these assumptions is called Compressed Sensing (CS). The goal of this chapter is to introduce the reader to the needed concepts to be able to determine the needed conditions for being able to find an efficient, stable and robust reconstruction method of an estimate or solution of the \emph{inverse problem} $\mathbf{x}=A^{-1}\mathbf{y}$ by exploiting the theory of CS. 
+\\We also want to be able to have some answer to the following questions:
+\begin{itemize}
+  \item What properties and conditions does $A$ need to have in order for $\mathbf{x}$ to be reconstructable?
+  \item Does a suitable algorithm for finding $\mathbf{x}$ exist?
+\end{itemize}
+
+
+
+\section{Main Assumptions: Sparsity and Compressibility}
+
+The main assumption we do about the vector $\mathbf{x}$ we are trying to recover is that it is sparse. Informally, a vector is \emph{sparse} if most of its components is zero, particularly if we find an appropriate basis for the given vector $\mathbf{y}=A\mathbf{x}$. For instance, natural images are sparse in the wavelet domain. 
+Before we define sparsity formally, we recall the definition of the \emph{support} of a given vector. 
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition} The support of a vector $\mathbf{x}	 \in \mathbb{C}^{N}$ is the index set of its non-zero entries, that is: 
+$$supp(\mathbf{x}):=\set{i \in [N]: x_{i} \neq 0}.$$
+	
+	
+\end{definition}	
+\end{tcolorbox}
+
+
+
+In Compressive Sensing it is customary to abuse the $l_{0}$ notation to denote the cardinality of the support set , i.e. the number of non-zero entries of a vector. The $\norm{\cdot}_{0}$ fails to be a norm since it does not satisfy the scaling property of norms. We can now define \emph{s-sparse} vectors.
+
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition}
+The vector $\mathbf{x} \in \mathbb{C}^{N}$ is called \emph{s-sparse} if it has no more than \emph{s} non-zero entries, that is if: 
+$\norm{\mathbf{x}}_{0} \leq s$	
+	
+	
+\end{definition}	
+\end{tcolorbox}
+
+
+The notion of sparsity is an ideal one, meaning that in the real world it may very well be that the vector we are trying to recover is only close to being sparse. In order for CS to handle more problems, we may also be interested in the following notion of  \emph{compressibility}. 
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+
+\begin{definition}
+For \emph{p} > 0, the measure of a vectors compressibility is given by the $l_p$-error of best $s$-term approximation to $\mathbf{x} \in \mathbb{C}^{N}$ defined by 
+\begin{equation*}
+\sigma \mathbf{(x)}_{p}:= inf \set{\norm{ \mathbf{x}-\mathbf{z}}_{p}, \mathbf{z} \in \mathbb{C}^{N} \text{ is } s\text{-sparse}}
+\end{equation*}
+\end{definition}	
+\end{tcolorbox}
+
+
+Informally, a vector is compressible if the $l_{p}$-error decays quickly in $s$. For instance in image processing, if we can describe most of the variance in image data with a few components of a vector. 
+
+
+\section{Basic Requirements of $A$} 
+
+What properties does $A$ need to have in order to have the possibility to reconstruct every s-sparse vector \emph{regardless} of the reconstruction method? For instance, what is the minimal number of rows that $A$ needs to have such that it would be possible to find every s-sparse vector? We have the following result: 
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+For a given matrix $A \in \mathbb{C}^{m \times N}$, the following statements are equivalent: 
+\begin{enumerate}[label=\alph*)]
+	\item Every s-sparse vector ${\mathbf{x} \in \mathbb{C}^N}$ is the unique s-sparse solution of $A \mathbf{z} = A \mathbf{x}$, that is, if $A \mathbf{x} = A \mathbf{z}$ and both 				$\mathbf{z}$ and $\mathbf{x}$ are s-sparse, then $\mathbf{z} = \mathbf{x}$.
+ 	\item The null space $ker(A)$ does not contain any 2s-sparse vector other than the zero vector, that is, $ker(A) \cap 	\set{\mathbf{z} \in \mathbb{C}^N : \norm{\mathbf{z}}_0 \leq 2s} = \set{\mathbf{0}}.$
+	\item For every $S \subset [N]$ with $card(S) \leq 2s,$ the submatrix $A_S$ is injective.
+	\item Every set of 2s columns of $A$ is linearly independent.
+\end{enumerate}
+
+
+\end{theorem}
+\end{tcolorbox}
+
+\begin{proof}
+b)$\implies$a) Let $\mathbf{x,z}$ be $s$-sparse vectors, not necessarily unique, such that $A\mathbf{x} =A\mathbf{z}$. Then $\mathbf{x-z}$ is at most 2$s$-sparse and using linearity of $A$ we get $A(\mathbf{x-z})=\mathbf{0}$. If b) holds, then the kernel only contains the zero vector of 2$s$-sparse vectors, then the only way $A(\mathbf{x-z})=\mathbf{0}$ is true, is if $\mathbf{x=z}$, thus $\mathbf{x}$ is the unique s-sparse vector.
+\\ a)$\implies$b) Assume that $\mathbf{x}$ is the unique $s$-sparse vector such that $A\mathbf{x} =A\mathbf{z}$. Let $\mathbf{v} \in ker(A)$ be $2s$-sparse. Since $\mathbf{v}$ is $2s$-sparse, there exist a way to construct $\mathbf{v}$ from $\mathbf{x-z}$ where $\mathbf{x, z}$ are both $s$-sparse and such that they have no components in common. Assuming a) holds, then we have $\mathbf{x}=\mathbf{z}=\mathbf{v}=\mathbf{0}$.
+\\ b)$\iff$c)$\iff$d) For a $2s$-sparse vector $\mathbf{v}$ with $S$ = supp $\mathbf{v}$, if $\mathbf{a}_1,....,\mathbf{a}_S$ are the column vectors of the submatrix $A_S$ made from $A$, we get $A\mathbf{v}=A_S\mathbf{v_S}$. Noting that $S$ = supp $\mathbf{v}$ ranges through all possible subsets of [N] with card($S$)$\leq 2s$ ranging through all the possible $2s$-sparse $\mathbf{v}$ vectors. Then in this view, linear independence d), injectivity c) and that the kernel is trivial b) are equivalent statements about $A$.
+
+\end{proof}
+
+
+
+With a little knowledge about how to construct invertible matrices, we can derive the following result from the above theorem.
+
+
+
+\begin{tcolorbox}[colback=green,colframe=white]
+\begin{corollary}
+For any integer $N \geq 2s,$ there exists a matrix $A \in \mathbb{C}^{m \times N}$ with $m = 2s$ rows such that every s-sparse vector $\mathbf{x} \in \mathbb{C}^{N}$ can be recovered from the vector $\mathbf{y}=A\mathbf{x} \in \mathbb{C}^{m}$. 
+\end{corollary}
+\end{tcolorbox}
+
+\begin{proof}
+Let $t_1,t_2,....,t_N$ be strictly positive numbers and consider the matrix $A \in \mathbb{C}^{m \times N}$ with $m = 2s$ defined by 
+\begin{equation*}
+A =
+\begin{bmatrix}
+   1 & 1 & \cdots & 1 \\
+   t_1 & t_2 & \cdots & t_N \\
+   \vdots  & \vdots  & \cdots & \vdots  \\
+   t_{1}^{2s-1} & t_{2}^{2s-1} & \cdots & t_{N}^{2s-1}
+ \end{bmatrix}
+\end{equation*}
+
+Now define a square submatrix $A_S \in \mathbb{C}^{m \times m}$ indexed by $S$ = $\set{i_1 < ... < i_m}$ as 
+\begin{equation*}
+A_S =
+\begin{bmatrix}
+   1 & 1 & \cdots & 1 \\
+   t_{i_1} & t_{i_2} & \cdots & t_{i_m} \\
+   \vdots  & \vdots  & \ddots & \vdots  \\
+   t_{i_1}^{2s-1} & t_{i_2}^{2s-1} & \cdots & t_{i_m}^{2s-1}
+ \end{bmatrix}
+\end{equation*}
+
+The given submatrix $A_S$ can be recognized as the transposed \emph{Vandermonde matrix}. A result about Vandermonde matrices is that its determinant, in view of $A_S$, can be expressed as det($A_S$) = $\prod{k<l \leq m}(t_{i_l} - t_{i_k})$.  Since the t's were defined to be strictly positive it follows that det($A_S$) > 0, and hence $A_S$ is invertible. The Invertible Matrix Theorem then tells us that $A_S$ is injective which means that condition $iii)$ in Theorem 2.4 holds and then we have a unique s-sparse vector $\mathbf{x} \in \mathbb{C}^N$ such that  $A \mathbf{z} = A \mathbf{x}$.
+\end{proof}
+
+\section{Finding Suitable Reconstruction Algorithms}
+
+Recall that the compressed sensing problem is to find an s-sparse vector $\mathbf{x} \in \mathbb{C}^N$ given $\mathbf{y} = A\mathbf{x}$. Abusing the customary  $l_{0}$ notation for the number of non-zero entries, we can reformulate this problem as an optimization problem, that is: 
+
+
+\begin{equation}
+\tag{$P_0$}
+\text{minimize} \  \norm{ \mathbf{z}}_{0} \ \ \ \ \text{subject to}   \ A \mathbf{z}=\mathbf{y}.
+\end{equation}
+
+A naive approach to solving this could be to look at it as a combinatorial optimization problem and use brute force to calculate every square system $A_{S}^{*}A_S\mathbf{x} =A_{S}^{*}\mathbf{y},$  for $\mathbf{x} \in \mathbb{C}^S$ where $S$ runs through all possible subsets of $[N]$ with size $s$. This might very well work on small sizes of $N$, but the total amount of subsets the algorithm has to go through is determined by the formula $\binom{N}{s}$. A quick illustration shows that with $N = 1000, s = 10$ we have $\binom{1000}{10} \geq \binom{1000}{10}^{10} = 10^{20}$ linear systems of size $10 \times 10$ to solve. Assuming one could solve each system in $10^{-10}$ seconds, it would still take $10^10$ seconds, ie. several human lifespans, thus the brute force approach is completely unpractical for sufficiently large $N$. 
+
+\section*{$P_0$ is NP-hard}
+
+It's not only the brute force approach that is not bounded by a polynomial expression, it might be that there doesn't exist an approach bounded by a polynomial expression at all. In fact, we have the following result: 
+
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+The $l_{0}$-minimization problem for an arbitrary matrix $A \in \mathbb{C}^{m \times N}$ and a vector $\mathbf{y} \in \mathbb{C}^{m}$ is NP-hard.
+
+\end{theorem}
+\end{tcolorbox}
+
+Before proving the result, let us recall some of the terminology: 
+
+\begin{itemize}
+	\item The class of P problems consists of all decision problems for which there exists a polynomial-time algorithm, ie. an input size bounded by a polynomial expression,for finding a solution.
+	\item The class of NP problems, not to be confused with NP-hard, consists of all decision problems for which there exists a polynomial-time algorithm \emph{certifying} a solution.
+	\item The class of NP-hard problems consists of all problems for which \emph{solving} algorithm could be transformed in polynomial time into a \emph{solving} algorithm for any NP-problem. 
+\end{itemize}
+
+This means that if we can show that a given problem solves an other problem belonging a certain class of problems, then the given problems also belongs to that same class. 
+
+\begin{proof}
+If we can show that a known NP-hard problem can be reduced in polynomial time to the $l_0$-minimization problem then $l_0$-minimization itself is NP-hard. 
+\\Let The Exact Cover by 3-sets problem be our known NP-hard problem. The Exact Cover by 3-sets problem says that given a collection  $\set{\mathcal{C}_i, i \in [N]}$ of 3-element subsets of $[m]$, does there exist an exact partition or cover of the set $\set{1,2,...,m} = [m]$?
+\\
+\\ Let $\set{\mathcal{C}_i, i \in [N]}$ be the collection of 3-element subsets of $[m]$. Define vectors $\mathbf{a}_1,...,\mathbf{a}_N \in  \mathbb{C}^m$ by
+\begin{equation*}
+a_{ij} = 
+\begin{cases} 
+      1 \ \text{if} \  j \in \mathcal{C}_i, \\
+      0 \ \text{if} \  j \notin \mathcal{C}_i.
+\end{cases}
+\end{equation*}
+where $j \in [m]$.
+\\
+\\Define a matrix $A \in \mathbb{C}^{m \times N}$ and a vector $\mathbf{y} \in \mathbb{C}^m$ by
+\begin{equation*}
+A = 
+\begin{bmatrix}
+\mathbf{a}_1 \cdots \mathbf{a}_N 
+\end{bmatrix}
+\ \text{and} \ \ \mathbf{y} = [1,...,1]^{T} .
+\end{equation*}
+
+Since $N \leq \binom{m}{3}$, this construction can be done in polynomial time since $\binom{m}{3} = \frac{m(m-1)(m-2)}{3!}$ which is a 3rd degree polynomial in $m$. 
+\\
+\\If a vector $\mathbf{z} \in \mathbb{C}^N$ satisfies $A\mathbf{z}=\mathbf{y}$, then all the $m$ components of $A\mathbf{z}$ are nonzero and $\norm{A\mathbf{z}}_0 = m$. Since each vector $\mathbf{a}_i$ has exactly 3 nonzero components, the vector $A\mathbf{z}$ = $\sum_{j=1}^{N}z_j\mathbf{a}_j$ has at most 3 $\norm{z}_0$ nonzero components, $\norm{A\mathbf{z}}_0 \leq 3 \norm{z}_0$ and consequently $\norm{z}_0 \geq m/3$ . Now consider the $l_0$-minimization  and let $\mathbf{x} \in \mathbb{C}^N$ be the output. We separate two cases:
+\\
+\\
+1. If $\norm{\mathbf{x}}_0 = m/3$, then the collection $\set{\mathcal{C}_j, j \in \text{supp}(\mathbf{x})}$ forms an exact cover of $[m]$, for otherwise the $m$ components of $A\mathbf{x} = \sum_{j=1}^{N}x_j\mathbf{a}_j$ would not all be nonzero.
+\\
+\\
+2. If $\norm{\mathbf{x}}_0 > m/3$, then no exact cover $\set{\mathcal{C}_j, j \in J}$ can exist, for otherwise the vector $\mathbf{z} \in \mathbb{C}^N$, defined by $z_j$ = 1 if $j \in J$ and $z_j$ = 0 if $j \neq J$, would satisfy $A\mathbf{z}=\mathbf{y}$ and $\norm{\mathbf{z}}_0 = m/3$, contradicting the $l_0$-minimality of $\mathbf{x}$. 
+\\
+\\
+This shows that solving $l_0$-minimization problem enables one to solve the Exact Cover by 3-sets problem and consequently $l_0$-minimization problem is NP-hard. 
+\end{proof}
+
+
+
+
+\section*{$P_q$ where $0 < q < 1$ also NP-hard}
+
+
+
+If $P_0$ optimization is intractable, would $P_q$ optimization be a better approach? Not according to the following proposition:
+
+
+\begin{tcolorbox}[colback=green,colframe=white]
+\begin{proposition}
+$l_{q}$-minimization  for $0 < q < 1$ is NP-hard.
+\end{proposition}
+\end{tcolorbox}
+
+\begin{proof}
+The proof goes along the same lines as proving the NP-hardness of $l_0$-minimization, that is if $l_q$-minimization can help to verify that a given NP-hard problem has a solution, that is if the minimum of $\norm{ \mathbf{w}}_{q}$ subject to $A\mathbf{w}=\mathbf{y}$, equals $n$, then $l_q$-minimization must necessarily also belong to the same class of NP-hard or NP-complete problems. \\
+The \emph{partition problem} consists, given integers $a_1,a_2,....,a_n$, in deciding whether there exists two sets $I, J \subset [n]$ such that  $I \cap J = \emptyset$, $I \cup J = [n]$ and $\sum{a_i} = \sum{a_j}$ for $i, j \in I, J$ respectively.\\
+Define
+
+\begin{equation*}
+A =
+\begin{bmatrix}
+   a_1 & a_2 & \cdots & a_n & -a_1 & -a_2 & \cdots & -a_n \\
+   1 & 0 & \cdots & 0 & 1 & 0 & \cdots & 0 \\
+   0 & 1 & \cdots & 0 & 0 & 1 & \cdots & 0 \\
+   \vdots  & \ & \ddots & 0 & \vdots & \ & \ddots & 0 \\
+  0 &\cdots & 0 & 1& 0& \cdots & 0 &1 
+ \end{bmatrix}
+ \text{and} \ \mathbf{y} = [0,1,1,....,1]^{T}.
+\end{equation*}
+
+Let $\mathbf{x}$ and $\mathbf{z}$ be the first and second half of the input vector $\mathbf{w}$ to $A$ respectively. That $A\mathbf{w}=\mathbf{y}$ implies that $\sum_{i=1}^{n}a_{i}x_{i} = \sum_{i=1}^{n}a_{i}z_{i}$ and $x_i+z_i = 1$ for all $i$. We seek to minimize $\sum_{i=1}^{n}(x_i^p + z_i^p)$ under these constraints. \\
+The minimum value for the objective function when only the constraints $x_i+y_i$ are considered is $n$, and this occurs if and only if only 0's and 1's are involved. \\
+If the minimum $\norm{ \mathbf{w}}_{q}$ subject to $A\mathbf{w}=\mathbf{y}$ is $n$, then it will also be $n$ when only the $x_i+y_i = 1 $ constraints are considered. This means that either $x_i$ or $z_i$ is equal to 1, for all $i$. Let $I$ be the set of $i$'s where $x_i$=1, and $J$ be the set of $i$'s where $z_i$=1. We then have $I \cap J = \emptyset$ and $I \cup J = [n]$, ie. a partition on the form we seek. \\Defining $x_i$ as 1 when $i \in I$ and defining $\mathbf{z}$ similarly, we obtain a vector $\mathbf{w}$ where all the constraints are fulfilled and where the minimum $n$ is obtained.
+
+
+ 
+\end{proof}
+
+
+\section* {$P_q$ where $q > 1$ }
+
+If both $l_0$ and $l_q$-minimization for $0 < q < 1$ is NP-hard, how about $l_q$-minimization for $q$ > 1? Unfortunately, this optimization problem fails to recover even 1-sparse vectors. We have the following proposition:
+
+\begin{tcolorbox}[colback=green,colframe=white]
+\begin{proposition}
+Let $q$ > 1 and let $A$ be a $m \times N$ matrix with $m < N$. Then there exists a 1-sparse vector which is not a minimizer of $P_q$. 
+\end{proposition}
+\end{tcolorbox}
+
+\begin{proof}
+Since $m < N$, we have to from linear algebra that the kernel of $A$ is non-trivial. Hence there must exists a $\mathbf{v} \neq{\mathbf{0}} \in \text{ker}(A)$ such that $A\mathbf{v}=\mathbf{0}$. Assume, for the sake of contradiction, that all standard basis vectors $\mathbf{e}_j$ are minimizers. Choose a $j$ so that $v_j \neq 0$. Then
+\begin{equation*}
+\norm{\mathbf{e}_j + t\mathbf{v}}_{q}^{q} = \abs{1 + tv_j}^q + \sum_{k \neq j } \abs{tv_k}^q = \abs{1 + tv_j}^q + \abs{t}^q\sum_{k \neq j } \abs{v_k}^q
+\end{equation*}
+
+Define two functions such that
+\begin{equation*}
+g_{+}(t) = (1 + tv_j)^q + t^q\sum_{k \neq j } \abs{v_k}^q
+\end{equation*}
+\begin{equation*}
+g_{-}(t) = (1 + tv_j)^q + (-t)^q\sum_{k \neq j } \abs{v_k}^q
+\end{equation*}
+
+For $\abs{t}$ < $1/v_j$, $\norm{\mathbf{e}_j + t\mathbf{v}}_{q}^{q}$ coincides with $g_+$ for $t \geq 0$, and $g_-$ for $t \leq 0.$ Taking the derivatives of $g_+$ and $g_-$ we get
+
+\begin{equation*}
+g'_{+}(t) = qv_j(1 + tv_j)^{q-1} + qt^{q-1}\sum_{k \neq j } \abs{v_k}^q
+\end{equation*}
+\begin{equation*}
+g'_{-}(t) = qv_j(1 + tv_j)^{q-1} - q(-t)^{q-1}\sum_{k \neq j } \abs{v_k}^q
+\end{equation*}
+
+Taking the limit of the two derivatives and then for $q > 1$ we get
+\begin{equation*}
+\lim_{t \rightarrow 0+} g'_{+}(t) = \lim_{t \rightarrow 0-} = g'_{-}(t) = qv_j
+\end{equation*}
+
+This means that near 0, $\norm{\mathbf{e}_j + t\mathbf{v}}_{q}^{q}$ has derivative arbitrarily near $qv_j \neq 0$. Since a linear function with derivative $qv_j$ has no minimum near 0, then with $t = 0$, $\mathbf{e}_j$ can't be a minimizer of $P_q$, which consequently contradicts our assumption that all standard basis vectors $\mathbf{e}_j$ are minimizers of $P_q$.
+
+
+\end{proof}
+
+
+\section*{The special case $P_q$ where $q = 1$}
+
+Recall that in an optimization problem we try to minimize or maximize an objective function subject to constraint functions. If all the constraint functions are also convex functions, then the optimization problem becomes a convex optimization problem. Thus both $l_0$ and $l_q$-minimization for $0 < q < 1$ are non-convex optimization problems. If all the constraint functions are linear functions, then the following convex optimization problem
+
+
+\begin{equation}
+\tag{$P_1$}
+\text{minimize} \  \norm{ \mathbf{z}}_{1} \ \ \ \ \text{subject to}   \ A \mathbf{z}=\mathbf{y}.
+\end{equation}
+
+ is also a linear program. Efficient algorithms exists for solving LP's. For instance, the Simplex method, behaves like a polynomial-time algorithm for solving real-life LP problems. $l_1$ -minimization is also known \emph{basis pursuit} and during the next sections we shall see that given certain assumptions on $A$ we can actually solve $P_1$ and that the recovered solutions will be sparse.
+ \section{Basis Pursuit} 
+
+In order to show how BP can identify the solution to ($P_{0}$), we need to introduce some definitions and theorems, an important property which our matrix must have, is the so-called Null Space Property of a matrix A: 
+
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition} 
+A matrix $A$  $\in$ $\mathbb{C}^{m \times N}$ is said to satisfy the \emph{Null Space Property (NSP)} relative to a set $S$ $\subset$ $\set{1,2,...,N}$ if 
+\[
+\text{min} \ \norm{ \mathbf{v}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1}  \ \text{for all} \ \mathbf{v} \in \text{ker} A \setminus \set{\mathbf{0}}
+\]
+$A$ is said to satisfy the \emph{Null Space Property of order s} if it satisfies the null space property relative to any set S $\subset$ $\set{1,2,...,N}$ with |S| $\leq$ \emph{s}.
+\end{definition}
+\end{tcolorbox}
+
+The following theorem shows that the NSP of a matrix is a sufficient condition in order to solve ($P_{0}$).
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+Given a matrix $A$ $\in$ $\mathbb{C}^{m \times N}$, every vector  $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ supported on a set $S$ is the unique solution $(P_1)$ with A$\mathbf{x}$ = $\mathbf{y}$ if and only if A satisfies the NSP relative to $S$. \\ \\
+Furthermore, if the set $S$ varies, then every s-sparse vector $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ is the unique solution to $(P_1)$ with A$\mathbf{x}$ = $\mathbf{y}$ if and only if A satisfies the NSP of order s.
+\end{theorem}
+\end{tcolorbox}
+
+\begin{proof}
+
+Let S be a fixed index set, and assume that every vector  $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ supported on this set, is the unique minimizer of $(P_1)$. From the assumption it follows that for  $\mathbf{v}$ $\in$ \text{ker} $A$ $\setminus$ $\set{\mathbf{0}}$, the vector $\mathbf{v}_{S}$ is the unique minimizer of $(P_1)$. Since $A(\mathbf{v}_{S}+\mathbf{v}_{\overline{S}}$) = $\mathbf{0}$ and $\mathbf{-v}_{S} \neq \mathbf{v}_{\overline{S}}$, from the minimality assumption we must have that $\norm{ \mathbf{-v}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1}$. This established the NSP relative to S.
+\\ \\
+Conversely, assume that NSP relative to $S$ holds. Let $\mathbf{x}$ $\in$ $\mathbb{C}^{N}$ be supported on  $S$ and a vector $\mathbf{z}$ $\in$ $\mathbb{C}^{N}$, $\mathbf{z} \neq \mathbf{x}$, such that $A\mathbf{z} = A\mathbf{x}$. Following the rules for norms and taking complements for the support of a set , we obtain
+\begin{equation*}
+\norm{ \mathbf{x}}_{1} \leq \norm{ \mathbf{x} - \mathbf{z}_{S}}_{1} +  \norm{\mathbf{z}_{S}}_{1} =\norm{\mathbf{v}_{S}}_{1}  + \norm{\mathbf{z}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1} + \norm{\mathbf{z}_{S}}_{1} = \norm{ \mathbf{-z}_{\overline{S}}}_{1} + \norm{\mathbf{z}_{S}}_{1} = \norm{\mathbf{z}}_{1}.
+\end{equation*}
+Which shows that $\mathbf{x}$ obtains the unique minimum.
+\\ \\
+To prove the second part of the theorem, let $S$ vary and assume that every $s$-sparse vector  $\mathbf{x}$ is found by solving $(P_1)$ subject to $A\mathbf{x} = \mathbf{y}$. Let $\mathbf{z}$ be the solution to $P_0$ subject to  $A\mathbf{x} = \mathbf{y}$ then $\norm{\mathbf{z}}_{0} \leq \norm{\mathbf{x}}_{0}$ so that also $\mathbf{z}$ is $s$-sparse. But since every $s$-sparse vector is the unique minimizer of $(P_1)$, we have that $\mathbf{x} = \mathbf{z}$ and the result follows.
+\end{proof}
+
+
+\section*{Minimum Number Of Rows For Basis Pursuit}
+
+From the results above it is clear that if a matrix possesses the NSP of order $s$, the BP will solve $(P_1)$. Next we will introduce a theorem that can identify when $A$ has the NSP of order $s$.  
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+Given a matrix A $\in \mathbb{C}^{m \times N}$, then every set of 2s columns of A is linearly independent if and only if A satisfies the NSP of order $s$. 
+\end{theorem}
+\end{tcolorbox}
+
+
+
+\begin{proof}
+Assume that every $2s$ columns of $A$ is linearly independent, then from The Invertible Matrix Theorem, we have that the kernel of $A$ does not contain any other $2s$-sparse vector other than $\mathbf{0}$. Now let $\mathbf{x}$, and $\mathbf{z}$ be $s$-sparse with $A\mathbf{z} = A\mathbf{x}$. Then $A(\mathbf{x}-\mathbf{z}) = \mathbf{0}$ and $\mathbf{x}-\mathbf{z}$ is 2$s$-sparse, but since ker $A \setminus \set{\mathbf{0}}$ is empty, we must have $\mathbf{x}=\mathbf{z}$, but this implies that the NSP of order s holds.
+\\ Conversely, assume that the kernel of $A$ does not contain any other $2s$-sparse vector other than $\mathbf{0}$, then for any set $S$ with card($S$) = $2s$, $A_{S}\mathbf{x} = \mathbf{0}$ only has the trivial solution and thereby $2s$ linearly independent columns. 
+\end{proof}
+
+From these results we can derive that : 
+
+
+\begin{tcolorbox}[colback=green,colframe=white]
+\begin{corollary}
+In order for Basis Pursuit to solve $(P_{0})$, the matrix A $\in \mathbb{C}^{m \times N}$ has to satisfy: 
+\begin{equation*}
+m \geq 2s
+\end{equation*}
+\end{corollary}
+\end{tcolorbox}
+
+\begin{proof}
+Assume that it is possible to uniquely recover any $s$-sparse vector $\mathbf{x}$ from $\mathbf{y}=A\mathbf{x}$. Then, by Theorem 2.4, statement a) holds, and consequently so does d), that is, that every set of $2s$ columns of $A$ is linearly independent. Thus rank($A$) $\geq 2s$, but we also have that the rank of a matrix can not be greater than the number of rows $m$, so we must have rank($A$)$\leq m$. Combining and arranging these two inequalities, we get that 
+\begin{equation*}
+2s \leq \text{rank}(A) \leq m
+\end{equation*}
+which implies, $m \geq 2s$, the inequality in the corollary.
+\end{proof}
+
+
+\section*{Stability}
+
+
+Basis Pursuit features another important property, namely \emph{stability}.
+This property tackles sparsity defects, that is, to recover a vector $\mathbf{x} \in \mathbb{C}^N$ whose error to the true underlying vector is controlled by its distance to an $s$-sparse vector. 
+
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition}
+A matrix $A \in \mathbb{C}^{m \times N}$ is said to satisfy the \emph{stable null space property} with $0 < \rho < 1$ relative to a set $S \subset [N]$ if 
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1}  \leq  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} \ \text{for all} \ \mathbf{v} \in \text{ker} A
+\end{equation*}
+\\ Furthermore, it satisfies the stable null space of order \emph{s} if it satisfies the stable null space property relative to any set $S \subset [N]$ with card($S$) $\leq s$.
+
+\end{definition}
+\end{tcolorbox}
+
+If a matrix satisfies the stable null space property of order $s$, then the $l_1$-error to the true underlying vector $\mathbf{x}$ is given by 
+\begin{equation}
+\norm{\mathbf{x-x'}}_1 \leq \frac{2(1+\rho)}{1-\rho}\sigma_s \mathbf{(x)}_1
+\end{equation}
+
+The next result will give us a condition for when, the inequality (2.1) and the stable null space property, will hold.
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+The matrix $A \in \mathbb{C}^{m \times N}$ satisfies the stable null space property with constant $0 < \rho < 1$ relative to $S$ if and only if
+\begin{equation}
+\norm{\mathbf{z-x}}_{1} \leq \frac{1 + \rho}{1 - \rho}(\norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1+2 \norm{\mathbf{x}_{\overline{S}}}_{1})
+\end{equation}
+for all vectors $\mathbf{x,z}, \in \mathbb{C}^N$ with $A\mathbf{z} = A\mathbf{x}$. 
+\end{theorem}
+\end{tcolorbox}
+
+
+Before proving Theorem 2.14, we show that (2.2) implies (2.1). Let $S$ be the set of the $s$ largest non-negative components of $\mathbf{x}$, then $\norm{\mathbf{x}_{\overline{S}}}_1 = \sigma_s \mathbf{(x)}_1 .$
+If $\mathbf{x'}$ is a minimizer of ($P_1$), then $\norm{\mathbf{x'}}_1 \leq \norm{\mathbf{x}}_1$ and $A\mathbf{x'} = A\mathbf{x}$. The right-hand side of the inequality (2.2) with $\mathbf{z = x'}$ will then be equal to the right hand side of inequality (2.1). 
+
+\begin{proof}
+To prove Theorem 2.14, assume that the matrix $A$ satisfies inequality (2.2) for all vectors $\mathbf{x,z} \in \mathbb{C}^N$ with $A\mathbf{z} = A\mathbf{x}$. Given a vector $\mathbf{v} \in \text{ker}(A)$, since  $A\mathbf{v}_{\overline{S}} = A(\mathbf{-v}_S)$, we can apply (2.2) with $\mathbf{x} = \mathbf{-v}_S$ and $\mathbf{z} = \mathbf{v}_{\overline{S}}$. This gives us that
+\begin{equation*}
+\norm{\mathbf{v}}_{1} \leq \frac{1 + \rho}{1 - \rho}(\norm{\mathbf{v}_S}_1-\norm{\mathbf{v}_{\overline{S}}}_1)
+\end{equation*}
+
+Rearranging and cancelling equal terms, this can be written as
+
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1}  \leq  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} 
+\end{equation*}
+
+which we recognize as the stable NSP with constant $0 < \rho < 1$. 
+\\ \\Conversely, assume that the matrx $A$ satisfies the stable NSP with constant $0 < \rho < 1$ relative to $S$.  Then for $\mathbf{x,z} \in \mathbb{C}^N$ with $A\mathbf{z} = A\mathbf{x}$, we get that $\mathbf{v = z-x} \in \text{ker}(A)$ yields 
+
+\begin{equation}
+\norm{ \mathbf{v}_{S}}_{1}  \leq  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1}. 
+\end{equation}
+\\Since $\norm{ \mathbf{v}_{\overline{S}}}_{1} = \norm{ \mathbf{(z-x)}_{\overline{S}}}_{1}$, we can rewrite (2.3) into
+
+\begin{equation*}
+\norm{ \mathbf{v}_{\overline{S}}}_{1} \leq \norm{ \mathbf{z}_{1}} - \norm{ \mathbf{x}_{1}} + \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} + 2 \norm{ \mathbf{x}_{\overline{S}}}_{1}.
+\end{equation*}
+
+Since $\rho < 1$, this can be rewritten as 
+
+\begin{equation*}
+\norm{ \mathbf{v}_{\overline{S}}}_{1} \leq \frac{1}{1-\rho}(\norm{ \mathbf{z}_{1}} - \norm{ \mathbf{x}_{1}} + 2 \norm{ \mathbf{x}_{\overline{S}}}_{1}).
+\end{equation*}
+
+Using (2.3) once again, we chain the inequalities to get,
+
+\begin{equation*}
+\norm{\mathbf{v}}_1 = \norm{ \mathbf{v}_{\overline{S}}}_{1} + \norm{\mathbf{v}_S}_{1} \leq (1+\rho)\norm{ \mathbf{v}_{\overline{S}}}_{1} \leq \frac{1+\rho}{1-\rho}(\norm{ \mathbf{z}}_{1} - \norm{ \mathbf{x}}_{1} + 2 \norm{ \mathbf{x}_{\overline{S}}}_{1})
+\end{equation*}
+
+which is (2.2), the desired inequality.
+
+
+\end{proof}
+
+
+
+\section*{Robustness}
+
+Basis Pursuit features another important property, namely \emph{robustness}.
+This property tackles noise.
+
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition}
+Given $q \geq 1$, the matrix $A \in \mathbb{C}^{m \times N}$ is said to satisfy the $l_q$\emph{-robust null space property} (rNSP), with constants $0 < \rho < 1$ and $ \tau > 0$, relative to a set $S \subset [N]$ if 
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{q}  <  \frac{\rho}{s^{1-1/q}} \norm{ \mathbf{v}_{\overline{S}}}_{1} + \tau \norm{A\mathbf{v}} \ \text{for all} \ \mathbf{v} \in \mathbb{C}^{N}.
+\end{equation*}
+\\ Furthermore, it satisfies the $l_q$-rNSP of order $s$ if it satisfies the $l_q$-rNSP relative to any set $S \subset [N]$ with $\text{card}(S) \leq s$.
+
+\end{definition}
+\end{tcolorbox}
+
+In order to introduce a more general result using $l_q$-rNSP, we need an intermediate result that holds for the ordinary rNSP, that is setting $q = 1. $
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+The matrix $A \in \mathbb{C}^{m \times N}$ satisfies the robust null space property with constants $ 0 < \rho < 1$ and $ \tau > 0 $ relative to S if and only if
+\begin{equation}
+\norm{\mathbf{z-x}}_{1} \leq \frac{1 + \rho}{1 - \rho}(\norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1+2 \norm{\mathbf{x}_{\overline{S}}}_{1}) + \frac{2\tau}{1-\rho}\norm{A(\mathbf{z-x})}
+\end{equation}
+for all vectors $\mathbf{x,z} \in \mathbb{C}^{N}.$
+\end{theorem}
+\end{tcolorbox}
+
+\begin{proof}
+Very similar to the proof of Theorem 2.14, will therefore use results from there when appropriate. 
+\\Assume $A$ satisfies (2.4) for all vectors $\mathbf{x,z} \in \mathbb{C}^{N}.$ Let $\mathbf{v} \in \mathbb{C}^{N}$ be so that $\mathbf{v} = \mathbf{z-x}$ with $\mathbf{z} = \mathbf{v}_{\overline{S}}$ and $\mathbf{x} = \mathbf{-v}_S$ which gives
+\begin{equation*}
+\norm{\mathbf{v}}_1 \leq \frac{1+\rho}{1-\rho}(\norm{ \mathbf{v}_{\overline{S}}}_{1} - \norm{ \mathbf{v}_S}_{1}) + \frac{2\tau}{1-\rho} \norm{A\mathbf{v}}.
+\end{equation*}
+Multiplying by $(1-\rho)$ on both sides and expanding $\norm{\mathbf{v}}_1$ on the left side gives
+\begin{equation*}
+(1-\rho)(\norm{\mathbf{v}_S}_1 + \norm{\mathbf{v}_{\overline{S}}}_1) \leq (1+\rho)(\norm{ \mathbf{v}_{\overline{S}}}_{1} - \norm{ \mathbf{v}_S}_{1}) + 2\tau \norm{A\mathbf{v}}.
+\end{equation*}
+Expanding, cancelling equal terms and dividing by 2 on both sides results in
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1}  \leq  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} + \tau \norm{A\mathbf{v}}
+\end{equation*}
+which is the rNSP with constants $0 < \rho < 1$ and $\tau > 0$ . 
+\\\\For the converse, assume $A$ satisfies rNSP with constants $0 < \rho < 1$ and $\tau > 0$ relative to $S$. For $\mathbf{z,x} \in \mathbb{C}^{N}$ with $\mathbf{v = z - x}$, the rNSP gives
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1}  \leq  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} + \tau \norm{A\mathbf{v}},
+\end{equation*}
+\begin{equation*}
+\norm{ \mathbf{v}_{\overline{S}}}_{1}   \leq  \norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1+\norm{ \mathbf{v}_{S}}_{1}+2 \norm{\mathbf{x}_{\overline{S}}}_{1}
+\end{equation*}
+Combining these two inequalities and using the rNSP again we arrive at
+\begin{equation*}
+\norm{\mathbf{v}}_1 = \norm{\mathbf{v}_S}_1 + \norm{\mathbf{v}_{\overline{S}}}_1 \leq (1+\rho)\norm{\mathbf{v}_S}_1 + \tau \norm{A\mathbf{v}} 
+\end{equation*}
+\begin{equation*}
+\leq \frac{1+\rho}{1-\rho}(\norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1+2 \norm{\mathbf{x}_{\overline{S}}}_{1}) + \frac{2\tau}{1-\rho}\norm{A\mathbf{v}},
+\end{equation*}
+which is the desired inequality. 
+
+
+\end{proof}
+
+ 
+
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+Given $1 \leq p \leq q$, suppose that the matrix $A \in \mathbb{C}^{m \times N}$ satisfies the $l_q$-robust null space property of order \emph{s} with constants $0 < \rho < 1$ and $ \tau > 0$ . Then, for any $\mathbf{x}, \mathbf{z} \in \mathbb{C}^{N}$, 
+\begin{equation*}
+\norm{\mathbf{x-z}}_{p} \leq \frac{C}{s^{1-1/p}}(\norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1+2\sigma_s \mathbf{(x)}_1) + Ds^{1/p-1/q}\norm{A(\mathbf{z-x})}, 
+\end{equation*}
+where $C:=(1+\rho)^2/(1-\rho)$ and $D:=(3+\rho)\tau/(1-\rho)$.
+\end{theorem}
+\end{tcolorbox}
+
+In order to prove the above result, we need the following little lemma:
+
+\begin{tcolorbox}[colback=green,colframe=white]
+\begin{lemma}
+For any $q > p > 0 $ and any $\mathbf{x} \in \mathbb{C}^N$, the inequality 
+\begin{equation*}
+\sigma_s \mathbf{(x)}_q \leq \frac{c_{p,q}}{s^{1/p-1/q}}\norm{\mathbf{x}}_p
+\end{equation*}
+holds with
+\begin{equation*}
+c_{p,q} = \Big[\Big(\frac{p}{q}\Big)^{p/q}\Big(1-\frac{p}{q}\Big)^{1-p/q}\Big]^{1/p} \leq 1.
+\end{equation*}
+
+Particularly for our proof, with the choice $p = 1$ and $q = p$ gives
+
+\begin{equation*}
+\sigma_s \mathbf{(x)}_p \leq \frac{1}{s^{1-1/p}}\norm{\mathbf{x}}_1
+\end{equation*}
+
+
+\end{lemma}
+\end{tcolorbox}
+\begin{proof}
+Proof is omitted here for sake of readability, but can be found in the appendix.
+\end{proof}
+
+
+\begin{proof}(Theorem 2.17)
+\\Remark that the $l_q$-rNSP implies the $l_1$-rNSP and the $l_p$-rNSP ($p \leq q$) in the forms
+
+\begin{equation}
+\norm{ \mathbf{v}_{S}}_{1}  \leq  \rho \norm{ \mathbf{v}_{\overline{S}}}_{1} + \tau s^{1-1/q} \norm{A\mathbf{v}},
+\end{equation}
+\begin{equation}
+\norm{ \mathbf{v}_{S}}_{p}  \leq   \frac{\rho}{s^{1-1/q}} \norm{ \mathbf{v}_{\overline{S}}}_{1} + \tau s^{1/p-1/q} \norm{A\mathbf{v}},
+\end{equation}
+for all $\mathbf{v} \in \mathbb{C}^N$ and all $S \subset [N]$ with card($S$)$ \leq s$. In view of inequality (2.5), applying Theorem 2.16 with $S$ chosen as an index set of $s$ largest non-negative components of $\mathbf{x}$ we get
+
+\begin{equation}
+\norm{\mathbf{z-x}}_{1} \leq \frac{1 + \rho}{1 - \rho}(\norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1+2\sigma_s \mathbf{(x)}_1) + \frac{2\tau}{1-\rho}s^{1-1/q}\norm{A(\mathbf{z-x})}.
+\end{equation}
+
+Next, we choose $S$ as an index set of $s$ largest non-negative components of $\mathbf{z-x}$, and apply Lemma 2.18 to it, which yields
+
+\begin{equation*}
+\norm{\mathbf{z-x}}_{p} \leq \norm{(\mathbf{z-x})_{\overline{S}}}_{p} + \norm{(\mathbf{z-x})_S}_{p} \leq \frac{1}{s^{1-1/p}}\norm{\mathbf{z-x}}_1 + \norm{(\mathbf{z-x})_S}_{p}.
+\end{equation*}
+
+In view of inequality (2.6), we get
+
+\begin{equation*}
+\norm{\mathbf{z-x}}_{p} \leq \frac{1}{s^{1-1/p}}\norm{\mathbf{z-x}}_1 + \frac{\rho}{s^{1-1/p}}\norm{(\mathbf{z-x})_{\overline{S}}}_{1} + \tau s^{1/p-1/q}\norm{A(\mathbf{z-x})}
+\end{equation*}
+\begin{equation}
+\leq \frac{1+\rho}{s^{1-1/p}}\norm{\mathbf{z-x}}_1 + \tau s^{1/p-1/q}\norm{A(\mathbf{z-x})}.
+\end{equation}
+
+Substituting (2.7) into the above inequality (2.8), gives us
+
+\begin{equation*}
+\norm{\mathbf{z-x}}_{p} \leq \frac{(1+\rho)^2}{(1-\rho)} \frac{1}{s^{1-1/p}}(\norm{\mathbf{z}}_1-\norm{\mathbf{x}}_1 + 2\sigma_s \mathbf{(x)}_1) 
+\end{equation*}
+\begin{equation*}
++ \frac{(3+\rho)}{(1-\rho)}\tau s^{1/p-1/q} \norm{A(\mathbf{z-x})}.
+\end{equation*}
+
+Setting $C:=(1+\rho)^2/(1-\rho)$ and $D:=(3+\rho)\tau/(1-\rho)$ and substituting for it above gives us the desired inequality from Theorem 2.17.
+
+
+\end{proof}
+
+
+\section{Matrix Analysis: Coherence}
+
+It's not easy to verify if a certain matrix is suitable for Basis Pursuit, that is, to check if the given matrix has the NSP. Thus it would be practical if we could find an easy way to calculate a quantity from which we can guarantee the success of the recovery algorithm. The \emph{coherence} is such a quantity. 
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition}
+Let $A \in \mathbb{C}^{m \times N}$ be a matrix with $l_2$-normalized columns, $\mathbf{a}_1,...,\mathbf{a}_N$ such that $\norm{\mathbf{a}_i}_2 = 1$ for all $i \in [N]$. The \emph{coherence} $\mu = \mu(A)$ of the matrix $A$ is defined as 
+\begin{equation*}
+\mu:= \max_{1 \leq i \neq j \leq N} \abs{\langle\mathbf{a}_i{,}\mathbf{a}_j\rangle}
+\end{equation*}
+The $l_1$-\emph{coherence} $\mu_1$ is defined for $s \in [N-1]$ as
+\begin{equation*}
+\mu_1(s):= \max_{i \in N} \max \Big\{\sum_{j \in S}\abs{\langle\mathbf{a}_i{,}\mathbf{a}_j\rangle}, S \subset [N], \text{card}(S) = s, i \notin S \Big\} 
+\end{equation*}
+\end{definition}
+\end{tcolorbox}
+
+
+
+From the definition of coherence we have the following result:
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}
+Let $A \in \mathbb{C}^{m \times N}$ be a matrix with $l_2$-normalized columns. If
+\begin{equation*}
+\mu_1(s) + \mu_1(s-1) < 1 ,
+\end{equation*}
+then every s-sparse vector $\mathbf{x} \in \mathbb{C}^N$ is exactly recovered from the vector $\mathbf{y} = A\mathbf{x}$ via Basis Pursuit.
+\end{theorem}
+\end{tcolorbox}
+
+\begin{proof}
+If we can show that for a given matrix $A \in \mathbb{C}^{m \times N}$, with $l_2$-normalized columns satisfying $\mu_1(s) + \mu_1(s-1) < 1$ also possess the NSP of order s, then according to Theorem 2.10, every s-sparse vector $\mathbf{x}$ recovered via Basis Pursuit, is unique. \\ Let $\mathbf{a}_1,...,\mathbf{a}_N$ denote the columns of $A$. If $\mathbf{v} \in $ ker($A$), then $A\mathbf{v}=\mathbf{0}$ can be rewritten as the sum of the column vectors of $A$ as the sum $\sum_{j=1}^{N}v_j\mathbf{a}_j = \mathbf{0}$. Since the $\mu_1(s)$ coherence function is a statement about the sum of the inner products of pairwise columns of $A$, it will be convenient to rewrite a particular weight $v_i$ as:
+\begin{equation*}
+v_i = v_i\langle\mathbf{a}_i{,}\mathbf{a}_i\rangle = -\sum_{j=1, j \neq i}^{N}v_j\langle\mathbf{a}_j{,}\mathbf{a}_i\rangle 
+\end{equation*}
+Splitting $[N]$ into two parts $S$ and $\overline{S}$ and taking the absolute value of $v_i$ it follows that
+\begin{equation*}
+\abs{v_i} \leq \sum_{l \in \overline{S}}\abs{v_l} \abs{\langle\mathbf{a}_l{,}\mathbf{a}_i\rangle} +\sum_{j \in S, j \neq i}\abs{v_j}\abs{\langle\mathbf{a}_j{,}\mathbf{a}_i\rangle}
+\end{equation*}
+Summing over all $i \in S$ we get 
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1} = \sum_{i \in S}\abs{v_i} \leq \sum_{l \in \overline{S}}\abs{v_l}\sum_{i \in S}\abs{\langle\mathbf{a}_l{,}\mathbf{a}_i\rangle} +\sum_{j \in S}\abs{v_j}\sum_{i \in S, i \neq j}\abs{\langle\mathbf{a}_j{,}\mathbf{a}_i\rangle}
+\end{equation*}
+ \begin{equation*}
+ \leq \sum_{l \in \overline{S}}\abs{v_l}\mu_1(s) + \sum_{j \in S}\abs{v_j}\mu_1(s-1) = \mu_1(s) \norm{ \mathbf{v}_{\overline{S}}}_{1} +\mu_1(s-1)\norm{ \mathbf{v}_{S}}_{1} 
+\end{equation*}
+Rearranging and neglecting the terms between the first term and the last in the equations above we get 
+\begin{equation*}
+(1-\mu_1(s-1))\norm{ \mathbf{v}_{S}}_{1} \leq \mu_1(s) \norm{ \mathbf{v}_{\overline{S}}}_{1}
+\end{equation*}
+using the first part of the condition in the theorem, $\mu_1(s) + \mu_1(s-1) < 1$, we get the desired inequality
+\begin{equation*}
+\norm{ \mathbf{v}_{S}}_{1}  <  \norm{ \mathbf{v}_{\overline{S}}}_{1} 
+\end{equation*}
+which concludes the proof.
+
+\end{proof}
+
+
+

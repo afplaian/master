@@ -1,0 +1,69 @@
+\chapter{Instabilities In Deep Learning}
+
+\section{Lack Of Kernel Awareness}
+
+
+Suppose we have trained a NN to approximate an inverse map, $\Psi: \mathbb{C}^{m}\rightarrow  \mathbb{C}^{N}$ where $m << N$. For the NN to be useful, it should perform well on the training set and test set. However, if the NN recovers two vectors $\mathbf{x, x'}$  whose difference lies in the null space of $A$, then there exist a ball around $\mathbf{y}=A\mathbf{x}$ where the NN may perform badly with small perturbations from $\mathbf{y}$. Before we state this consequence as a theorem, recall that local $\epsilon$-Lipschitz constant of a function $\phi$ at $\mathbf{y} \in \mathbb{C}^{m}$ is defined as
+\begin{equation*}
+L^{\epsilon}(\phi,y) = \ \underset{0<d_{2}(z,y,)\leq \epsilon}{\text{sup}} \ \cfrac{d_1(\phi(z),\phi(y))}{d_2(z,y)}
+\end{equation*}
+
+
+\begin{theorem} (Universal Instability Theorem)
+Let $d_1$ and $d_2$ be metrics on $\mathbb{C}^N$ and $\mathbb{C}^m$ respectively, A : $\mathbb{C}^{N}\rightarrow  \mathbb{C}^{m}$ a linear map, and $\Psi : \mathbb{C}^{m}\rightarrow  \mathbb{C}^{N}$ a continuous reconstruction map. Suppose there exist x, x' $\in \mathbb{C}^{N}$ and $\eta$ > 0 such that 
+\begin{equation}
+d_1(\Psi(Ax),x) < \eta , \ d_1(\Psi(Ax'),x') < \eta, 
+\end{equation}
+\begin{equation}
+d_2(Ax,Ax') \leq \eta. 
+\end{equation}
+\\
+Then there is a closed non-empty ball $\mathcal{B} \subset \mathbb{C}^m$ centred at y = Ax such that the local $\epsilon$-Lipschitz constant at any $\tilde{y} \in \mathcal{B}$ is bounded from below: 
+\begin{equation}
+L^{\epsilon}(\Psi,\tilde{y}) \geq \cfrac{1}{\epsilon}  (d_1(x,x') - 2\eta) , \ \ \epsilon \geq \eta. 
+\end{equation}
+\end{theorem}
+
+
+\begin{proof}
+By the definition of the supremum we have that
+\begin{equation*}
+L^{\epsilon}(\Psi ,y) = \underset{0<d_{2}(z,y,)\leq \epsilon}{\text{sup}} \cfrac{d_1(\Psi(z),\Psi(y))}{d_2(z,y)} \geq \cfrac{d_1(\Psi(Ax),\Psi(Ax'))}{d_2(Ax,Ax')} 
+\end{equation*}
+
+Applying the reverse triangle inequality twice we get
+\begin{equation*}
+\cfrac{d_1(\Psi(Ax),\Psi(Ax'))}{d_2(Ax,Ax')} \geq \cfrac{d_1(x,\Psi(Ax'))-d_1(\Psi(Ax),x)}{d_2(Ax,Ax')} \geq \cfrac{d_1(x,x')-d_1(\Psi(Ax),x)-d_1(\Psi(Ax'),x')}{d_2(Ax,Ax')}
+\end{equation*}
+
+
+Applying assumption (4.1) and making the bound sharper with $\epsilon \geq \eta$, we get
+
+\begin{equation*}
+\cfrac{d_1(x,x')-d_1(\Psi(Ax),x)-d_1(\Psi(Ax'),x')}{d_2(Ax,Ax')} >  \cfrac{d_1(x,x')-2\eta}{\epsilon} 
+\end{equation*}
+\\Neglecting the middleterms we get
+
+\begin{equation*}
+L^{\epsilon}(\Psi ,y) >  \cfrac{d_1(x,x')-2\eta}{\epsilon} . 
+\end{equation*}
+\\\\Next, let $\eta_1 = d_1(\Psi(Ax),x)$, and observe that $\eta_1 < \eta$ by (4.1).
+\\Since $\Psi$ is continuous at $y = Ax$, there exist a $\delta > 0$ such that for all $\tilde{y} \in \mathbb{C}^m$ with $d_2(y,\tilde{y}) < \delta$, we have that $d_1(\Psi(y),\Psi(\tilde{y})) \leq \eta-\eta_1$. Thus, for a specific $\delta > 0$, we get that $d_1(\Psi(y),\Psi(\tilde{y})) \leq \eta-\eta_1$ for all $\tilde{y} \in \mathcal{B}_1$, where  $\mathcal{B}_1 = \set{\tilde{y} \in \mathbb{C}^m : d_2(y,\tilde{y}) < \delta)}$. Next, let $\mathcal{B}_2 = \set{\tilde{y} \in \mathbb{C}^m : d_2(Ax',\tilde{y}) \leq \eta)}$ and $\mathcal{B} = \mathcal{B}_1 \cap \mathcal{B}_2$. Observe that $\mathcal{B} \neq \emptyset$, since $y \in \mathcal{B}$. Thus, for any $\tilde{y} \in \mathcal{B}$ we have
+
+
+\begin{equation*}
+\begin{split}
+L^{\epsilon}(\Psi ,\tilde{y}) & = \underset{0<d_{2}(z,\tilde{y},)\leq \epsilon}{\text{sup}} \cfrac{d_1(\Psi(z),\Psi(\tilde{y}))}{d_2(z,\tilde{y})} \geq \cfrac{d_1(\Psi(Ax'),\Psi(\tilde{y}))}{d_2(Ax',\tilde{y})} \\
+& \geq \cfrac{d_1(\Psi(Ax),\Psi(Ax'))-d_1(\Psi(Ax),\Psi(\tilde{y}))}{d_2(Ax',\tilde{y})} \\
+& \geq \cfrac{d_1(x,x')-d_1(\Psi(Ax),x)-d_1(\Psi(Ax'),x')-d_1(\Psi(Ax),\Psi(\tilde{y}))}{d_2(Ax',Ax)} \\
+& \geq \cfrac{d_1(x,x')-\eta_1-\eta-(\eta-\eta_1)}{d_2(Ax',Ax)} \\
+& \geq \cfrac{1}{\epsilon}  (d_1(x,x') - 2\eta). 
+\end{split}
+\end{equation*}
+
+which is the desired inequality (4.3). 
+
+\end{proof}
+
+
+

@@ -1,0 +1,145 @@
+\chapter{Neural Networks And Deep Learning}
+
+Neural Networks (NN's), a biologically-inspired programming paradigm, provide among the best solutions to many problems where the neural network has a lot of training data. Consequently, NN's perform well in areas such as image classification, speech recognition, natural language processing, and so forth. However, NN's have reportedly seen to suffer from instabilities in image reconstruction. Our goal is to get mathematical insight to why these instabilities occur. We begin by introducing the basic elements of NN's in framework of supervised machine learning. 
+
+\section{Supervised Machine Learning}
+In supervised machine learning, the objective is to learn a mapping $f$ from an input space $\mathbb{U}$ to an output space $\mathbb{V}$. The 2-tuple set 
+$\set{(u_i, v_i)}^{n}_{i=1}$, $u_i \in \mathbb{U}$, $v_i \in \mathbb{V}$ is refer to as the \emph{training set}.  By varying the output space $\mathbb{V}$, we can choose what our function $f$ should model. \\For instance, if $v_i$ takes the values -1 or 1 , then $f$ is modelling  a \emph{binary classification} problem or if $v_i$ takes three or more discrete values then $f$ is modelling the \emph{multiclass classification} problem. \\ \\
+Image reconstruction can be cast as a supervised learning problem as following : Let $\mathbb{U} \subseteq \mathbb{R}^M$ and $\mathbb{V} \subseteq \mathbb{R}^N$ such that $\set{(y_i, x_i)}^{n}_{i=1}$ is the training set with $x_i$ as images and $y_i$ the corresponding measurements. Our goal is then to find a matrix $A$ such that we can express 
+\begin{equation*}
+y_i = Ax_i + \epsilon ,\  \ i \in \set{1,...,n}
+\end{equation*}
+which corresponds to learning the mapping $f(u_i) = v_i + \epsilon$ , $ i \in \set{1,...,n}$. It is desirable that this mapping has \emph{small training error}, i.e. $f(u_i) \approx v_i$  for $i$ = 1,...,$n$, but also that the mapping \emph{generalizes} well to new data $\set{(y_k, x_k)}$ which is close to , but not part of the training set.\\ The task of computing the mapping $f$ is known as \emph{training the model}, such a mapping could for instance be a NN.
+
+\section{Design}
+The term neural network covers a large class of models and learning methods. Here we try to give a description that is sufficient for the later analysis.
+
+
+
+\begin{tcolorbox}[colback=blue,colframe=white]
+\begin{definition}
+Let $n_0,...,n_L \in \mathbb{N}$. Let $W_l : \mathbb{R}^{n_{l-1}} \rightarrow \mathbb{R}^{n_l}$ for $l = 1,2,...,L$ be affine maps. Let $\rho_1,...,\rho_{L-1} : \mathbb{R}\rightarrow  \mathbb{R}$ be non-linear, differentiable functions and let $n_0=M$ \text{and} $n_L=N$. Then a map $\Psi : \mathbb{R}^{M}\rightarrow  \mathbb{R}^{N}$ given by
+\begin{equation*}
+\Psi(y) = W_{L}(\rho_{L-1}(...\rho_{1}(W_{1}(y))...))
+\end{equation*}
+is called a \emph{Neural Network}.
+\end{definition}
+\end{tcolorbox}
+
+
+The type of network defined above is a feedforward network. It takes an input $y$ and \emph{feeds} it forward through the network via an alternating sequence of affine maps and non-linear activation functions. It is common to visualize the network as a graph, where the nodes of the graph are the \emph{neurons} and the entries of $W_l$ are the weights assigned to each edge of the graph. At a given \emph{layer}, each neuron takes in a sum of linear combination from the outputs of the neurons in the previous layer, applies a bias, applies an activation function and finally feeds it forward to the next layer of neurons.  
+The number of layers and the number of neurons per layer together with the the activation function $\rho$ is called the \emph{architecture} of the network. 
+
+\begin{figure}
+\centerline{\includegraphics[width=8cm, height=5cm]{network_graph.png}}
+\caption{Extremely simplified NN with a single hidden layer.}
+\end{figure}
+
+
+The choice of activation function may be important to the performance of the network. Common activation functions in the literature include: 
+
+\begin{center}
+\begin{math}
+  ReLU(x)=\begin{cases}
+    x & \text{if $x>0$}\\
+    0 & \text{otherwise}
+  \end{cases} 
+\end{math}
+
+\begin{math}
+  tanh(x)=\cfrac{e^{2x}-1}{e^{2x}+1}
+\end{math}
+
+\begin{math}
+   \sigma(x)=\cfrac{1}{1+e^{-x}}
+\end{math}
+\end{center}
+
+If we look closer at the sigmoid function and the hyperbolic tangent, we observe that for large negative input or large positive input , the derivative of these functions will be close to zero. This is known as the \emph{vanishing gradient problem}, which can cause the \emph{training} of the network to be slow, which is the topic of the next section.
+
+\begin{figure}
+\centerline{\includegraphics[width=13cm, height=3.5cm]{activations.png}}
+\caption{Different choices of activations functions.}
+\end{figure}
+
+ 
+\section{Training}
+
+The training of a NN is to find values for the weights and biases such that the NN performs well on a given data set. To simplify notation, we will let $\theta$ be defined as the set of all trainable parameters. For a neural network this will typically be:
+\begin{equation*}
+\theta = \big\{\mathbf{W}_1,...,\mathbf{W}_L, \mathbf{b}_1,..., \mathbf{b}_L\big\}
+\end{equation*}
+
+We write $\Psi_\theta$ to emphasize that this NN uses $\theta$ as its parameters.
+
+
+One way to measure how well the network is trained, is by evaluating its performance on a given set by a \emph{cost function}.
+\subsection{Cost function}
+Several cost functions may be defined on the network. A popular choice is the \emph{quadratic} cost function, also known as the \emph{mean squared error(MSE)} given by:
+\begin{equation}
+C(  \theta  |   (\mathbf{u}_1,\mathbf{v}_1),...,(\mathbf{u}_n,\mathbf{v}_n)) = \cfrac{1}{2n}\sum_{i=1}^{n}\norm{\Psi(\mathbf{u}_i)-\mathbf{v}_i}^2
+\end{equation}
+
+Here $n$ is the total number of samples, $\mathbf{u}_i$ the input sample into the network and $\mathbf{v}_i$ the corresponding validation sample. Next, we want to optimize the trainable parameters $\theta$, that is to solve: 
+
+\begin{equation}
+\text{minimize } \ C(\theta | (\mathbf{u}_1,\mathbf{v}_1),...,(\mathbf{u}_n,\mathbf{v}_n))
+\end{equation}
+
+This problem is nonlinear, nonconvex and there is generally no possibility of computing global minimizers of it. Even worse, since a NN needs a huge number of parameters to perform well and a large set of training data, it is a major computational challenge. 
+\subsection{Gradient Descent Methods}
+To make the training of the NN's practical regarding the computational demand, a first-order optimization method is usually used to solve (3.2). These are methods based on the gradient descent. In a gradient descent method we pick a starting point $w_0$, then we follow the path of steepest descent, that is, we produce the sequence:
+
+\begin{equation}
+w_{i+1}=w_i - \tau_i \nabla C(w_i), \ i = 0,1,...
+\end{equation}
+
+Calculating the gradient requires one pass through all the training data. When the amount of training data is large, this ceases to be computationally feasible. However, there is at least one way to reduce the number of computational steps, known as \emph{Stochastic Gradient Descent}. 
+
+There are several variations, but the main idea is to compute the gradient from a smaller subset of the training data and thereby reducing the computation needed at step $i$. 
+
+In order to apply the stochastic gradient descent method, we need to compute the gradient. The common algorithm for computing such gradients, is known as \emph{backpropagation}. 
+
+\section{The Universal Approximation Theorem}
+
+In supervised machine learning we are assuming that there exists an underlying function that we are approximating. The Universal Approximation Theorem gives justification for the use of NN's to approximate such a function.
+
+
+
+
+\begin{tcolorbox}[colback=yellow,colframe=white]
+\begin{theorem}{(Universal Approximation Theorem)}
+Let $\mathcal{S} \subset \mathbb{R}^n$ be a compact set and let $\mathcal{C}(\mathcal{S})$ denote the vector space of continuous functions on $\mathcal{S}$. Let $\sigma \in \mathcal{C}(\mathcal{S})$. \\
+Then for any $g \in \mathcal{C}(\mathcal{S})$ and any $\epsilon > 0$, there exists a set of parameters $n \in \mathbb{N}$, $c_1,...,c_n \in \mathbb{R}$, $\mathbf{w}_1,...,\mathbf{w}_n \in \mathbb{R}^n$, $b_1,...,b_n \in \mathbb{R}$ such that $f:\mathbb{R}^n \rightarrow \mathbb{R}$ defined as 
+\begin{equation}
+f(\mathbf{x}) = \sum_{i=1}^{n} c_i\sigma(\mathbf{w}^{T}_i\mathbf{x}_i+b_i)
+\end{equation}
+satisfies
+\begin{equation*}
+\norm{f(\mathbf{x})-g(\mathbf{x})} < \epsilon
+\end{equation*}
+for all $\mathbf{x} \in \mathcal{S}$ if and only if $\sigma$ is not a polynomial. 
+\\\\In other words, the class of neural networks with one hidden layer are dense in $\mathcal{C}(\mathcal{S})$.
+\end{theorem}
+\end{tcolorbox}
+
+
+\begin{proof}
+If $\sigma$ is a polynomial of degree $m$, then for every choice of $\mathbf{x} \in \mathbb{R}^n$ and $b \in \mathbb{R}$, $\sigma(\mathbf{w}^{T}\mathbf{x}+b)$ is polynomial of total degree at most $m$, and thus does not span $\mathcal{C}(\mathcal{S})$. For the converse, see \todo{her trengs referanse}
+\end{proof}
+
+The Universal Approximation Theorem states that the class of NN's with one hidden layer is already extremely rich. However, there are reasons for considering deeper NN's, that is with more layers, since they might approximate certain functions more efficiently than shallow NN's.
+
+
+\section{The Success Of Deep Learning}
+\todo{trengs ref til ibm}According to IBM, Deep Learning is a subset of machine learning, which is essentially a NN with three or more layers. As we have seen in this chapter, solving a supervised machine learning problem with deep learning involves choosing a suitable NN architecture, optimization algorithm and hyperparameters, and then train the NN's large numbers of parameters by feeding it data.  
+\\Deep Learning has achieved a great number of successes during the last decade, yielding state-of-the-art performance on a range of challenging machine learning problems. Since the list of successes in different problems is quite long, we will only point out two examples that are milestones in history of Deep Learning applied to image classification tasks. The first milestone was achieved in 2012, when a deep learning-based classifier named \emph{AlexNet} won the \emph{ImageNet Large Scale Visual Recognition Challenge(ILSVRC)}. Prior to 2012, the winners were not deep learning based. Not only did it win, but it also achieved an error reduction of nearly $10\%$ over the previous year's winner. Since then, all winners of the ILSVRC contest have used deep learning. In less than a decade, the error rate was reduced from $30 \%$ to less than $4 \%$. In 2015, deep learning reached a second milestone, when it reduced the image classification error rate to sub $5 \%$, which is the error rate incurred by humans. As a result of this performance, the term 'superhuman' has been used to describe deep learning's performance on image classification. To the authors knowledge, deep learning is now the method of choice for most image classification tasks.
+\section{Why Go Beyond Compressed Sensing?}
+
+
+
+
+
+
+
+
